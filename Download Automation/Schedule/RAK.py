@@ -1,0 +1,236 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.alert import Alert
+from datetime import datetime, timedelta
+import time
+import pandas as pd
+import _functions as cfx
+from openpyxl import load_workbook
+import xlwings as xw
+
+options = Options()
+prefs = {
+    "download.prompt_for_download": True,
+    "download.default_directory": "",
+    "profile.default_content_settings.popups": 1
+}
+options.add_argument("--start-maximized")
+options.add_argument("--disable-popup-blocking")
+options.add_argument('--ignore-ssl-errors')
+options.add_argument('--ignore-certificate-errors')
+options.add_experimental_option("detach", True)     # it will not close the browser automatically
+options.add_experimental_option("prefs", prefs)
+
+zoom = '90%'
+
+def wait_for_element(by, value, timeout=20):
+    return WebDriverWait(driver, timeout).until(EC.presence_of_element_located((by, value)))
+
+def wait_for_clickable_element(by, value, timeout=20):
+    return WebDriverWait(driver, timeout).until(EC.element_to_be_clickable((by, value)))
+
+def login(username, password):
+    driver.get(url)
+    wait_for_element(By.ID, "email").clear()
+    driver.find_element(By.ID, "email").send_keys(username)
+    driver.find_element(By.ID, "password").clear()
+    driver.find_element(By.ID, "password").send_keys(password)
+    time.sleep(1)
+    wait_for_clickable_element(By.XPATH, "//button[text()='Sign In']").click()
+    time.sleep(1.5)
+    driver.execute_script(f"document.body.style.zoom='{zoom}'")
+    time.sleep(0.5)
+    wait_for_clickable_element(By.XPATH, "//i[contains(@class, 'pi-bars')]").click()
+    time.sleep(0.5)
+    wait_for_clickable_element(By.XPATH, "//i[contains(@class, 'pi-sun')]").click()
+    time.sleep(0.5)
+
+def dropdown_select(dropdown, option):
+    dd = wait_for_clickable_element(By.ID, dropdown)
+    dd.click()
+    opt = wait_for_clickable_element(
+        By.XPATH, f"//div[contains(@class, 'p-overlay')]//*[normalize-space()='{option}']"
+    )
+    # try:
+    #     opt.click()
+    # except:
+    driver.execute_script("arguments[0].scrollIntoView(true);", opt)
+        # time.sleep(0.5)
+    opt.click()
+    time.sleep(1)
+
+def login_and_select_date_field(username, password, date_field):
+    login(username, password)
+    dropdown_select('pn_id_17', date_field)
+
+def generate_month_ranges(year, step):
+    current_year = datetime.today().year
+    current_month = datetime.today().month
+    ranges = []
+
+    for i in range(1, 13, step):
+        start = i
+        end = min(i + step - 1, 12)
+
+        if year < current_year:
+            ranges.append((start, end))
+        elif year == current_year:
+            if start > current_month:
+                break
+            ranges.append((start, min(end, current_month)))
+    
+    return ranges
+
+def get_date_range(year, start_month, end_month):
+    date_from = datetime(year, start_month, 1)
+    if end_month == 12:
+        date_to = datetime(year, 12, 31)
+    else:
+        date_to = datetime(year, end_month + 1, 1) - timedelta(days=1)
+    return date_from, date_to
+
+def date_picker(datefrm, dateto):
+    def pick_date(date):
+        wait = WebDriverWait(driver, 5)
+        day = date.day
+        month_name, month = date.strftime('%b'), date.month - 1
+        year = date.year
+        date_label = f"{year}-{month}-{day}"
+
+        wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "p-datepicker-select-year"))).click()
+        wait.until(EC.element_to_be_clickable((By.XPATH, f"//span[text()=' {year} ']"))).click()
+        wait.until(EC.element_to_be_clickable((By.XPATH, f"//span[text()=' {month_name} ']"))).click()
+        wait.until(EC.element_to_be_clickable((By.XPATH, f"//span[@data-date='{date_label}']"))).click()
+
+    date_input = driver.find_element(By.CSS_SELECTOR, "p-datepicker input")
+    date_input.click()
+
+    pick_date(datefrm)
+    pick_date(dateto)
+
+row = 2
+def schedule(s_file):
+    global row
+    schedule_button = wait_for_clickable_element(By.XPATH, "//button[.//span[text()='Schedule']]")
+    schedule_button.click()
+
+    WebDriverWait(driver, 300).until(EC.alert_is_present())
+    time.sleep(1.5)
+
+    alert = Alert(driver)
+    alert_text0 = alert.text
+    alert_text = alert_text0.encode('ascii', errors='replace').decode('ascii')
+    
+    if "No results" in  alert_text or "Please contact administrator" in alert_text:
+        file_name, status = 'No Files', 'Error : No Data'
+    else:
+        parts = alert_text.replace(",", "").split(" ")
+        file_name, status = parts[0], parts[3]
+
+    rak_renames_sh.cell(row=row, column=1).value = file_name
+    rak_renames_sh.cell(row=row, column=2).value = s_file
+    rak_renames_sh.cell(row=row, column=3).value = status
+    row = row+1
+
+    Alert(driver).accept()
+    time.sleep(1.5)
+
+file_dict = {
+    "Unsettled_Sant" : "HIS",
+    "Remittance" : "Sub",
+    "Resub_Remittance" : "Resub",
+    "RAK" : "H",
+    "RAKP" : "P"
+}
+total_files = 0
+# year_wise_files = {}
+def process_all_for_user(email, password, files, instance):
+    global driver, total_files
+    driver = webdriver.Chrome(options=options)
+    driver.implicitly_wait(60)
+
+    login_and_select_date_field(email, password, date_field)
+
+    for template, yr_start, center, step in files:
+        dropdown_select('pn_id_7', template)
+        dropdown_select('pn_id_11', center)
+
+        for year in range(yr_start, yr_curr + 1):
+            # year_wise_file_count = 0
+            month_ranges = generate_month_ranges(year, step)
+            for sm, em in month_ranges:
+                date_from, date_to = get_date_range(year, sm, em)
+                date_picker(date_from, date_to)
+                time.sleep(1)
+
+                mns = '' if len(month_ranges) == 1 else f"_{sm}" if sm == em else f"_{sm}-{em}"
+                s_file = f"{file_dict[template]}_{instance}_{file_dict[center]}_{year}{mns}"
+                schedule(s_file)
+                total_files += 1
+                # year_wise_file_count += 1
+
+            # year_wise_files_key = f"{file_dict[template]}_{instance}_{file_dict[center]}_{year}"
+            # if not year_wise_files_key in year_wise_files:
+                # year_wise_files[year_wise_files_key] = year_wise_file_count
+
+    # with pd.ExcelWriter(workbook_path, engine='openpyxl', mode='a', if_sheet_exists='overlay') as excel_file:        
+        # df = pd.DataFrame(list(year_wise_files.items()), columns=['Files_Category', 'Count'])
+        # df.to_excel(excel_file, sheet_name="RAK_FilesCount", index=False)
+
+
+workbook_path = r"C:\Users\karthikeyans\Documents\BLUMIN\Automations\WebAutomation_ProcessMed.xlsx"
+workbook = load_workbook(workbook_path)
+rak_renames_sh_name = "RAK_Rename"
+rak_filescount_sh_name = "RAK_FilesCount"
+rak_renames_sh = workbook[rak_renames_sh_name]
+rak_filescount_sh = workbook[rak_filescount_sh_name]
+cfx.close_book(workbook_path)
+cfx.clearing(rak_renames_sh)
+cfx.clearing(rak_filescount_sh)
+
+url = "https://rcmbi.processmed.ae/login"
+date_field = "Encounter.End"
+yr_curr = datetime.today().year
+mn_curr = datetime.today().month
+
+dhpo_email, dhpo_password = 'rakbi-dhpo@processmed.ae', "xL=0UX+:sb=@x#n1X).y"
+rpo_email, rpo_password = 'rakbi-rypd@processmed.ae', "kQm?f_8U1uV7Bf>u.By}"
+
+dhpo_files = [
+    ('Unsettled_Sant', 2022, 'RAK', 6),
+    ('Unsettled_Sant', 2022, 'RAKP', 12),
+    ('Remittance', 2023, 'RAK', 4),
+    ('Remittance', 2023, 'RAKP', 12),
+    ('Resub_Remittance', 2023, 'RAK', 6),
+    ('Resub_Remittance', 2023, 'RAKP', 12),
+]
+
+rpo_files = [
+    ('Unsettled_Sant', 2022, 'RAK', 6),
+    ('Unsettled_Sant', 2022, 'RAKP', 12),
+    ('Remittance', 2023, 'RAK', 2),
+    ('Remittance', 2023, 'RAKP', 6),
+    ('Resub_Remittance', 2023, 'RAK', 3),
+    ('Resub_Remittance', 2023, 'RAKP', 12),                 
+]
+
+rak_renames_sh.cell(row=1, column=1).value = 'Old Name'
+rak_renames_sh.cell(row=1, column=2).value = 'New Name'
+rak_renames_sh.cell(row=1, column=3).value = 'Status'
+
+process_all_for_user(dhpo_email, dhpo_password, dhpo_files, 'DHPO')
+time.sleep(2)
+process_all_for_user(rpo_email, rpo_password, rpo_files, 'RPO')
+time.sleep(2)
+
+cfx.show_info("Total Files", f"Total Files generated : {total_files}")
+
+cfx.autofit_columns(rak_renames_sh)
+cfx.autofit_columns(rak_filescount_sh)
+workbook.save(workbook_path)
+
+wb = xw.Book(workbook_path)
+wb.sheets[rak_renames_sh_name].activate()
