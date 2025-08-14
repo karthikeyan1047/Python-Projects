@@ -43,8 +43,8 @@ while to_process:
 
     if alert_text and "e" in alert_text:
         if sm == em:
-            print(f"Cannot split further range ({sm},{em}), skipping...")
             continue
+            
         mid = (sm + em) // 2
         to_process.insert(0, (mid + 1, em))
         to_process.insert(0, (sm, mid))
