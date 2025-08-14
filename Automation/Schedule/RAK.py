@@ -236,3 +236,25 @@ workbook.save(workbook_path)
 
 wb = xw.Book(workbook_path)
 wb.sheets[rak_renames_sh_name].activate()
+
+
+
+
+# import _functions as cfx
+# total_files = 0
+# month_ranges = [(1, 4), (5, 8), (9,12)]
+# to_process = month_ranges.copy()
+# while to_process:
+#     sm, em = to_process.pop(0)
+#     alert_text = cfx.inputbox("Error", "Error")
+
+#     if alert_text and "e" in alert_text:
+#         if sm == em:
+#             print(f"Cannot split further range ({sm},{em}), skipping...")
+#             continue
+#         mid = (sm + em) // 2
+#         to_process.insert(0, (mid + 1, em))
+#         to_process.insert(0, (sm, mid))
+#     else:
+#         print(sm, em)
+#         total_files += 1
