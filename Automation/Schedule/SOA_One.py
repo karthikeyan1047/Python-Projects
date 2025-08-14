@@ -123,8 +123,10 @@ def schedule(s_file):
     alert_text0 = alert.text
     alert_text = alert_text0.encode('ascii', errors='replace').decode('ascii')
     
-    if "No results" in  alert_text or "Please contact administrator" in alert_text:
-        file_name, status = 'No Files', 'Error : No Data'
+    if "Please contact administrator" in alert_text:
+        file_name, status = 'Error', 'Split and Download'
+    elif "No results" in  alert_text:
+        file_name, status = 'No File', 'No Data'
     else:
         parts = alert_text.replace(",", "").split(" ")
         file_name, status = parts[0], parts[3]
