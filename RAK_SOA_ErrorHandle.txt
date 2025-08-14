@@ -76,8 +76,8 @@ for year in range(yr_start, yr_curr + 1):
 
         if alert_text and "Please contact administrator" in alert_text:
             if sm == em:
-                print(f"Cannot split further range ({sm},{em}), skipping...")
                 continue
+                
             mid = (sm + em) // 2
             to_process.insert(0, (mid + 1, em))
             to_process.insert(0, (sm, mid))
