@@ -1,6 +1,8 @@
-#--------
-# # OLD
-#--------
+# ================
+# # MONTH RANGE
+# ================
+
+### OLD
 
 total_files = 0
 # year_wise_files = {}
@@ -29,9 +31,8 @@ def process_all_for_user(email, password, files, instance):
                 total_files += 1
                 # year_wise_file_count += 1
 
-#-------------
-# # CHECKING
-#-------------
+
+### CHECKING
 
 import _functions as cfx
 total_files = 0
@@ -55,9 +56,7 @@ while to_process:
 print(total_files)
 
 
-#--------
-# # NEW
-#--------
+### NEW
 
 return alert_text   # -- in the last line of schedule
 for year in range(yr_start, yr_curr + 1):
@@ -84,3 +83,37 @@ for year in range(yr_start, yr_curr + 1):
             total_files += 1
         else:
             total_files += 1
+
+
+
+# =================
+### DATE RANGE 
+# =================
+
+from datetime import datetime, timedelta
+import _functions as cfx
+total_files = 0
+def process_date_range(date_from: datetime, date_to: datetime):
+    global total_files
+    alert_text = cfx.inputbox('Type', 'Enter the text : ')
+    if alert_text == 'e':
+        if (date_to - date_from).days == 0:
+            return
+
+        mid_date = date_from + (date_to - date_from) // 2
+        next_start = mid_date + timedelta(days=1)
+
+        process_date_range(date_from, mid_date)
+        process_date_range(next_start, date_to)
+        # print(date_from, date_to)
+    else:
+        total_files += 1
+        print(date_from.date(), date_to.date())
+        print((date_to.date() - date_from.date()).days)
+
+
+start_date = datetime.strptime("03/07/2025", "%d/%m/%Y")
+end_date = datetime.strptime("28/07/2025", "%d/%m/%Y")
+
+total_files = 0
+process_date_range(start_date, end_date)
