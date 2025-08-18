@@ -209,11 +209,11 @@ def rak_process():
     button_frame = tk.Frame(root)
     button_frame.pack()
 
-    tk.Button(button_frame, text="Open Base Folder", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='light green', command=lambda: [open_base_folder(), root.destroy()]).pack(pady=5)
-    tk.Button(button_frame, text="Rename Files", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='light green', command=lambda: [renaming_files(), root.destroy()]).pack(pady=5)
-    tk.Button(button_frame, text="Delete - Old SOA Files", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='light green', command=lambda: [delete_old_files(), root.destroy()]).pack(pady=5)
-    tk.Button(button_frame, text="Copy - Current Files to SOA", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='light green', command=lambda: [copy_current_files(), root.destroy()]).pack(pady=5)
-    tk.Button(button_frame, text="Delete Downloaded Files", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='light green', command=lambda: [delete_dwl_files(), root.destroy()]).pack(pady=5)
+    tk.Button(button_frame, text="Open Base Folder", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='#F08080', command=lambda: [open_base_folder(), root.destroy()]).pack(pady=5)
+    tk.Button(button_frame, text="Rename Files", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='#F08080', command=lambda: [renaming_files(), root.destroy()]).pack(pady=5)
+    tk.Button(button_frame, text="Delete - Old SOA Files", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='#F08080', command=lambda: [delete_old_files(), root.destroy()]).pack(pady=5)
+    tk.Button(button_frame, text="Copy - Current Files to SOA", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='#F08080', command=lambda: [copy_current_files(), root.destroy()]).pack(pady=5)
+    tk.Button(button_frame, text="Delete Downloaded Files", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='#F08080', command=lambda: [delete_dwl_files(), root.destroy()]).pack(pady=5)
 
     root.mainloop()
 
