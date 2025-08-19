@@ -90,46 +90,18 @@ for year in range(yr_start, yr_curr + 1):
 ### DATE RANGE 
 # =================
 
-from datetime import datetime, timedelta
-import _functions as cfx
-total_files = 0
 def process_date_range(date_from: datetime, date_to: datetime):
     global total_files
-    alert_text = cfx.inputbox('Type', 'Enter the text : ')
-    if alert_text == 'e':
-        if (date_to - date_from).days == 0:
-            return
 
-        mid_date = date_from + (date_to - date_from) // 2
-        next_start = mid_date + timedelta(days=1)
-
-        process_date_range(date_from, mid_date)
-        process_date_range(next_start, date_to)
-        # print(date_from, date_to)
-    else:
-        total_files += 1
-        print(date_from.date(), date_to.date())
-        print((date_to.date() - date_from.date()).days)
-
-
-start_date = datetime.strptime("03/07/2025", "%d/%m/%Y")
-end_date = datetime.strptime("28/07/2025", "%d/%m/%Y")
-
-total_files = 0
-process_date_range(start_date, end_date)
-
-
-
-
-
-
-def process_date_range(date_from: datetime, date_to: datetime):
-    date_picker(date_from, date_to)
-    time.sleep(1)
     sday = date_from.day
     eday = date_to.day
-    mns = f"_{sm}_{iday}-{eday}"
+    dmonth = date_from.month
+
+    mns = f"_{dmonth}_({sday}-{eday})"
     s_file = f"{file_dict[template]}_{instance}_{file_dict[center]}_{year}{mns}"
+
+    date_picker(date_from.date(), date_to.date())
+    time.sleep(1)
     alert_text = schedule(s_file)
 
     if alert_text and "Please contact administrator" in alert_text:
@@ -141,32 +113,32 @@ def process_date_range(date_from: datetime, date_to: datetime):
         process_date_range(date_from, mid_date)
         process_date_range(next_start, date_to)
     else:
-        total_files += 1 
+        total_files += 1
 
 
-return alert_text   # -- in the last line of schedule
 for year in range(yr_start, yr_curr + 1):
-    # year_wise_file_count = 0
-    month_ranges = generate_month_ranges(year, step)
-    to_process = month_ranges.copy()
+    to_process = months_ranges.copy()
     while to_process:
         sm, em = to_process.pop(0)
-        date_from, date_to = get_date_range(year, sm, em)
-        date_picker(date_from, date_to)
-        time.sleep(1)
 
         mns = '' if len(month_ranges) == 1 else f"_{sm}" if sm == em else f"_{sm}-{em}"
         s_file = f"{file_dict[template]}_{instance}_{file_dict[center]}_{year}{mns}"
+
+        date_from, date_to = get_date_range(year, sm, em)
+        date_picker(date_from, date_to)
+        time.sleep(1)
         alert_text = schedule(s_file)
 
         if alert_text and "Please contact administrator" in alert_text:
             if sm == em:
                 date_from, date_to = get_date_range(year, sm, em)
                 process_date_range(date_from, date_to)           
-            
-            mid = (sm + em) // 2
-            to_process.insert(0, (mid + 1, em))
-            to_process.insert(0, (sm, mid))
-            total_files += 1
+            else:
+                mid = (sm + em) // 2
+                to_process.insert(0, (mid + 1, em))
+                to_process.insert(0, (sm, mid))
         else:
             total_files += 1
+
+
+print(total_files)
