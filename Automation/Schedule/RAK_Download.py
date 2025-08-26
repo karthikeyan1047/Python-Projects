@@ -181,7 +181,7 @@ def process_all_for_user(email, password, files, instance):
     # with pd.ExcelWriter(workbook_path, engine='openpyxl', mode='a', if_sheet_exists='overlay') as excel_file:        
         # df = pd.DataFrame(list(year_wise_files.items()), columns=['Files_Category', 'Count'])
         # df.to_excel(excel_file, sheet_name="RAK_FilesCount", index=False)
-
+    driver.quit()
 
 workbook_path = r"C:\Users\karthikeyans\Documents\BLUMIN\Automations\WebAutomation_ProcessMed.xlsx"
 workbook = load_workbook(workbook_path)
