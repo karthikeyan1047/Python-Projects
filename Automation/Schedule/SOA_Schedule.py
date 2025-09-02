@@ -1,15 +1,16 @@
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.alert import Alert
-from datetime import datetime, timedelta
-import time
-import pandas as pd
-import _functions as cfx
 from openpyxl import load_workbook
 import xlwings as xw
+import pandas as pd
+from datetime import datetime, timedelta
+import time
+import _functions as cfx
+import pyautogui as gui
 
 options = Options()
 prefs = {
@@ -21,8 +22,11 @@ options.add_argument("--start-maximized")
 options.add_argument("--disable-popup-blocking")
 options.add_argument('--ignore-ssl-errors')
 options.add_argument('--ignore-certificate-errors')
-options.add_experimental_option("detach", True)     # it will not close the browser automatically
+options.add_experimental_option("detach", True)
 options.add_experimental_option("prefs", prefs)
+
+driver = webdriver.Chrome(options=options)
+driver.implicitly_wait(60)
 
 zoom = '90%'
 
@@ -118,12 +122,12 @@ def schedule(s_file):
     schedule_button.click()
 
     WebDriverWait(driver, 300).until(EC.alert_is_present())
-    time.sleep(1.5)
+    time.sleep(1)
 
     alert = Alert(driver)
     alert_text0 = alert.text
     alert_text = alert_text0.encode('ascii', errors='replace').decode('ascii')
-    
+
     if "Please contact administrator" in alert_text:
         file_name, status = 'Error', 'Split and Download'
     elif "No results" in alert_text:
@@ -132,107 +136,96 @@ def schedule(s_file):
         parts = alert_text.replace(",", "").split(" ")
         file_name, status = parts[0], parts[3]
 
-    rak_renames_sh.cell(row=row, column=1).value = file_name
-    rak_renames_sh.cell(row=row, column=2).value = s_file
-    rak_renames_sh.cell(row=row, column=3).value = status
+    soa_sh.cell(row=row, column=1).value = file_name
+    soa_sh.cell(row=row, column=2).value = s_file
+    soa_sh.cell(row=row, column=3).value = status
     row = row+1
 
     Alert(driver).accept()
     time.sleep(1.5)
 
-file_dict = {
-    "Unsettled_Sant" : "HIS",
-    "Remittance" : "Sub",
-    "Resub_Remittance" : "Resub",
-    "RAK" : "H",
-    "RAKP" : "P"
-}
 total_files = 0
-# year_wise_files = {}
-def process_all_for_user(email, password, files, instance):
-    global driver, total_files
-    driver = webdriver.Chrome(options=options)
-    driver.implicitly_wait(60)
+def process_all_for_user(email, password, centers):
+    global driver, total_files, row
 
     login_and_select_date_field(email, password, date_field)
-
-    for template, yr_start, center, step in files:
-        dropdown_select('pn_id_7', template)
+    dropdown_select('pn_id_7', template)
+    for center in centers:
         dropdown_select('pn_id_11', center)
-
-        for year in range(yr_start, yr_curr + 1):
-            # year_wise_file_count = 0
-            month_ranges = generate_month_ranges(year, step)
+        for year in range(2023, yr_curr + 1):
+            month_ranges = generate_month_ranges(year, 4)
             for sm, em in month_ranges:
                 date_from, date_to = get_date_range(year, sm, em)
                 date_picker(date_from, date_to)
                 time.sleep(1)
 
                 mns = '' if len(month_ranges) == 1 else f"_{sm}" if sm == em else f"_{sm}-{em}"
-                s_file = f"{file_dict[template]}_{instance}_{file_dict[center]}_{year}{mns}"
+                s_file = f"{center}_{year}{mns}"
                 schedule(s_file)
                 total_files += 1
-                # year_wise_file_count += 1
-
-            # year_wise_files_key = f"{file_dict[template]}_{instance}_{file_dict[center]}_{year}"
-            # if not year_wise_files_key in year_wise_files:
-                # year_wise_files[year_wise_files_key] = year_wise_file_count
-
-    # with pd.ExcelWriter(workbook_path, engine='openpyxl', mode='a', if_sheet_exists='overlay') as excel_file:        
-        # df = pd.DataFrame(list(year_wise_files.items()), columns=['Files_Category', 'Count'])
-        # df.to_excel(excel_file, sheet_name="RAK_FilesCount", index=False)
-    driver.quit()
+      
 
 workbook_path = r"C:\Users\karthikeyans\Documents\BLUMIN\Automations\WebAutomation_ProcessMed.xlsx"
 workbook = load_workbook(workbook_path)
-rak_renames_sh_name = "RAK_Rename"
-rak_filescount_sh_name = "RAK_FilesCount"
-rak_renames_sh = workbook[rak_renames_sh_name]
-rak_filescount_sh = workbook[rak_filescount_sh_name]
+soa_sh_name = 'SOA_Rename'
+soa_sh = workbook[soa_sh_name]
 cfx.close_book(workbook_path)
-cfx.clearing(rak_renames_sh)
-cfx.clearing(rak_filescount_sh)
+cfx.clearing(soa_sh)
 
 url = "https://rcmbi.processmed.ae/login"
-date_field = "Encounter.End"
+username = "hbaybi-dhpo@processmed.ae"
+password = "7ofsZit4L2hztw2HKbq^"
+date_field = "Encounter.Start"
+template = "Healthbay_SOA"
+centers = ['HBD', 'HBPV', 'HBPM', 'HBPW']
 yr_curr = datetime.today().year
 mn_curr = datetime.today().month
 
-dhpo_email, dhpo_password = 'rakbi-dhpo@processmed.ae', "xL=0UX+:sb=@x#n1X).y"
-rpo_email, rpo_password = 'rakbi-rypd@processmed.ae', "kQm?f_8U1uV7Bf>u.By}"
+soa_sh.cell(row=1, column=1).value = 'Old Name'
+soa_sh.cell(row=1, column=2).value = 'New Name'
+soa_sh.cell(row=1, column=3).value = 'Status'
 
-dhpo_files = [
-    ('Unsettled_Sant', 2022, 'RAK', 6),
-    ('Unsettled_Sant', 2022, 'RAKP', 12),
-    ('Remittance', 2023, 'RAK', 4),
-    ('Remittance', 2023, 'RAKP', 12),
-    ('Resub_Remittance', 2023, 'RAK', 6),
-    ('Resub_Remittance', 2023, 'RAKP', 12),
-]
-
-rpo_files = [
-    ('Unsettled_Sant', 2022, 'RAK', 6),
-    ('Unsettled_Sant', 2022, 'RAKP', 12),
-    ('Remittance', 2023, 'RAK', 2),
-    ('Remittance', 2023, 'RAKP', 6),
-    ('Resub_Remittance', 2023, 'RAK', 3),
-    ('Resub_Remittance', 2023, 'RAKP', 12),                 
-]
-
-rak_renames_sh.cell(row=1, column=1).value = 'Old Name'
-rak_renames_sh.cell(row=1, column=2).value = 'New Name'
-rak_renames_sh.cell(row=1, column=3).value = 'Status'
-
-process_all_for_user(dhpo_email, dhpo_password, dhpo_files, 'DHPO')
+process_all_for_user(username, password, centers)
 time.sleep(2)
-process_all_for_user(rpo_email, rpo_password, rpo_files, 'RPO')
-time.sleep(2)
+
+driver.quit()
 
 cfx.show_info("Total Files", f"Total Files generated : {total_files}")
 
-cfx.autofit_columns(rak_renames_sh)
-cfx.autofit_columns(rak_filescount_sh)
+cfx.autofit_columns(soa_sh)
 workbook.save(workbook_path)
 
-wb = xw.Book(workbook_path)
-wb.sheets[rak_renames_sh_name].activate()
+time.sleep(3)
+
+pg = int((((yr_curr - 2023) + 1) * 3)/10) + 2
+df = pd.read_excel(workbook_path, sheet_name='SOA_Rename')
+rename_dict = dict(df)
+old_names = rename_dict['Old Name'].to_list()
+
+login(username, password)
+
+wait_for_clickable_element(By.XPATH, "//button[.//span[text()='Reports']]").click()
+for center in centers:
+    dropdown_select('clientName', center)
+    wait_for_clickable_element(By.XPATH, "//button[.//span[text()='Refresh']]").click()
+
+    wait_for_element(By.XPATH, f"//table//tr/td[2][text()=' {center} ']", 30)
+
+    try:
+        wait_for_clickable_element(By.XPATH, "//button[@aria-label='First Page']", 5).click()
+    except:
+        pass
+
+    for i in range(1, pg+1):
+        WebDriverWait(driver, 20).until(
+            lambda d: len(d.find_elements(By.XPATH, "//*[@id='pn_id_1-table']/tbody/tr")) >= 10
+        )
+        rows = driver.find_elements(By.XPATH, "//*[@id='pn_id_1-table']/tbody/tr")
+        for r in range(1, len(rows)+1):
+            sch_filename = wait_for_element(By.XPATH, f"//*[@id='pn_id_1-table']/tbody/tr[{r}]/td[5]", 5).text
+            if sch_filename in old_names:
+                wait_for_clickable_element(By.XPATH, f"//*[@id='pn_id_1-table']/tbody/tr[{r}]/td[9]/p-button/button").click()
+                time.sleep(1)
+                gui.hotkey('enter')
+        wait_for_clickable_element(By.XPATH, "//button[@aria-label='Next Page']").click()
+driver.quit()
