@@ -114,11 +114,12 @@ def generate_month_ranges(year, step):
 def renaming_files():
     close_book(excel_file)
 
-    choice = int(inputbox(title="RAK/SOA", prompt="1. RAK\n2. SOA\n3. Reconciliation"))
+    choice = int(inputbox(title="RAK/SOA", prompt="1. RAK\n2. SOA\n3. Unsettled_SOA\n4. Reconciliation"))
     mapping = {
         1 : "RAK_Rename",
         2 : "SOA_Rename",
-        3 : "Recon_Rename"
+        3 : "Unsettled_SOA_Rename",
+        4 : "Recon_Rename"
     }
     sheet_name = mapping.get(choice, "Invalid choice")
     df = pd.read_excel(excel_file, sheet_name=sheet_name)

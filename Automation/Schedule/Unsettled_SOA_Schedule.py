@@ -149,7 +149,7 @@ def process_all_for_user(email, password, centers):
     for center in centers:
         dropdown_select('pn_id_11', center)
         for year in range(2023, yr_curr + 1):
-            month_ranges = generate_month_ranges(year, 4)
+            month_ranges = generate_month_ranges(year, 6)
             for sm, em in month_ranges:
                 date_from, date_to = get_date_range(year, sm, em)
                 date_picker(date_from, date_to)
@@ -163,7 +163,7 @@ def process_all_for_user(email, password, centers):
 
 workbook_path = r"C:\Users\karthikeyans\Documents\BLUMIN\Automations\WebAutomation_ProcessMed.xlsx"
 workbook = load_workbook(workbook_path)
-soa_sh_name = 'SOA_Rename'
+soa_sh_name = 'Unsettled_SOA_Rename'
 soa_sh = workbook[soa_sh_name]
 cfx.close_book(workbook_path)
 cfx.clearing(soa_sh)
@@ -172,7 +172,7 @@ url = "https://rcmbi.processmed.ae/login"
 username = "hbaybi-dhpo@processmed.ae"
 password = "7ofsZit4L2hztw2HKbq^"
 date_field = "Encounter.Start"
-template = "Healthbay_SOA"
+template = "Unsettled_SOA"
 centers = ['HBD', 'HBPV', 'HBPM', 'HBPW']
 yr_curr = datetime.today().year
 mn_curr = datetime.today().month
@@ -194,7 +194,7 @@ workbook.save(workbook_path)
 time.sleep(3)
 
 pg = int((((yr_curr - 2023) + 1) * 3)/10) + 2
-df = pd.read_excel(workbook_path, sheet_name='SOA_Rename')
+df = pd.read_excel(workbook_path, sheet_name='Unsettled_SOA_Rename')
 rename_dict = dict(df)
 old_names = rename_dict['Old Name'].to_list()
 
