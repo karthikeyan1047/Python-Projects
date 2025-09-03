@@ -46,12 +46,7 @@ def dropdown_select(dropdown, option):
             (By.XPATH, f"//div[contains(@class, 'p-overlay')]//*[normalize-space()='{option}']")
         )
     )
-    # try:
-        # opt.click()
-        # time.sleep(2)
-    # except:
     driver.execute_script("arguments[0].scrollIntoView(true);", opt)
-        # time.sleep(0.5)
     opt.click()
     time.sleep(1)
 
