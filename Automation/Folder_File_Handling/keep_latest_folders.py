@@ -12,7 +12,7 @@ def keep_latest_folder(main_folder, keep_count):
         for fld in os.listdir(main_folder) 
         if os.path.isdir(os.path.join(main_folder, fld))
     ]
-    flds_to_delete.sort(key=os.path.getctime, reverse=True)
+    flds_to_delete.sort(key=os.path.getmtime, reverse=True)
     flds_to_delete = flds_to_delete[keep_count:]
     for f in flds_to_delete:
         shutil.rmtree(f, onerror=wirte_access)
