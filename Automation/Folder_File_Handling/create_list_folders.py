@@ -8,5 +8,5 @@ def create_date_files(main_folder, foldersnames):
 
 
 main_folder = cfx.ifolder()
-foldersnames = ["water", "plant", "fuel", "Petrol"]
+foldersnames = ["folder1", "folder2", "folder3", "folder4"]
 create_date_files(main_folder, foldersnames)

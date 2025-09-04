@@ -1,0 +1,53 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.alert import Alert
+from openpyxl import load_workbook
+import pandas as pd
+import xlwings as xw
+from datetime import datetime, timedelta
+import time, math
+import _functions as cfx
+import pyautogui as gui
+
+
+def process_date_range(date_from, date_to):
+
+    date_picker(date_from, date_to)
+    time.sleep(1)
+    alert_text = schedule()
+
+    # alert_text = cfx.inputbox("X", "X : ")
+
+    # if alert_text == "e":
+    if "Please contact administrator" in alert_text:
+        if (date_to - date_from).days == 0:
+            return
+        mid_date = date_from + (date_to - date_from) // 2
+        next_start = mid_date + timedelta(days=1)
+
+        process_date_range(date_from, mid_date)
+        process_date_range(next_start, date_to)
+    else:
+        total_files += 1
+
+
+total_files = 0
+date_from = cfx.get_date()
+date_to = cfx.get_date()
+def process_all_for_user(email, password, files, instance):
+
+    global driver, total_files, date_from, date_to
+
+    driver = webdriver.Chrome(options=options)
+    driver.implicitly_wait(60)
+
+    login_and_select_date_field(email, password, date_field)
+
+    dropdown_select('pn_id_7', template)
+
+    for center in centers:
+        dropdown_select('pn_id_11', center)
+        process_date_range(date_from, date_to)

@@ -11,6 +11,6 @@ def create_date_files(main_folder, filenames, extension):
         workbook.save(file_path)
 
 main_folder = cfx.ifolder()
-filenames = ["water", "plant", "fuel", "Petrol"]
+filenames = ["file2", "file2", "file3", "file4"]
 create_date_files(main_folder, filenames, ".xlsx")
 os.startfile(main_folder)

@@ -56,11 +56,7 @@ def dropdown_select(dropdown, option):
     opt = wait_for_clickable_element(
         By.XPATH, f"//div[contains(@class, 'p-overlay')]//*[normalize-space()='{option}']"
     )
-    # try:
-    #     opt.click()
-    # except:
     driver.execute_script("arguments[0].scrollIntoView(true);", opt)
-        # time.sleep(0.5)
     opt.click()
     time.sleep(1)
 
@@ -113,31 +109,6 @@ def date_picker(datefrm, dateto):
     pick_date(datefrm)
     pick_date(dateto)
 
-def process_date_range(date_from: datetime, date_to: datetime, template:str, instance:str, year):
-    global total_files
-
-    sday = date_from.day
-    eday = date_to.day
-    dmonth = date_from.month
-
-    mns = f"_{dmonth}_({sday}-{eday})"
-    s_file = f"{file_dict[template]}_{instance}_{file_dict[center]}_{year}{mns}"
-
-    date_picker(date_from.date(), date_to.date())
-    time.sleep(1)
-    alert_text = schedule(s_file)
-
-    if alert_text and "Please contact administrator" in alert_text:
-        if (date_to - date_from).days == 0:
-            return
-        mid_date = date_from + (date_to - date_from) // 2
-        next_start = mid_date + timedelta(days=1)
-
-        process_date_range(date_from, mid_date)
-        process_date_range(next_start, date_to)
-    else:
-        total_files += 1
-
 row = 2
 def schedule(s_file):
     global row
@@ -167,7 +138,7 @@ def schedule(s_file):
     Alert(driver).accept()
     time.sleep(1.5)
 
-    return status
+    return alert_text, status
 
 file_dict = {
     "Unsettled_Sant" : "HIS",
@@ -176,6 +147,35 @@ file_dict = {
     "RAK" : "H",
     "RAKP" : "P"
 }
+
+
+def process_date_range(date_from: datetime, date_to: datetime, template:str, instance:str, year):
+    global total_files
+
+    sday = date_from.day
+    eday = date_to.day
+    dmonth = date_from.month
+
+    mns = f"_{dmonth}_({sday}-{eday})"
+    s_file = f"{file_dict[template]}_{instance}_{file_dict[center]}_{year}{mns}"
+
+    date_picker(date_from.date(), date_to.date())
+    time.sleep(1)
+    alert_text, status = schedule(s_file)
+
+    if "Please contact administrator" in alert_text:
+        if (date_to - date_from).days == 0:
+            return
+        mid_date = date_from + (date_to - date_from) // 2
+        next_start = mid_date + timedelta(days=1)
+
+        process_date_range(date_from, mid_date)
+        process_date_range(next_start, date_to)
+    else:
+        if status == "successfully":
+            total_files += 1
+
+
 total_files = 0
 def process_all_for_user(email, password, files, instance):
     global driver, total_files
@@ -193,26 +193,34 @@ def process_all_for_user(email, password, files, instance):
             while to_process:
                 sm, em = to_process.pop(0)
 
-                mns = '' if len(month_ranges) == 1 else f"_{sm}" if sm == em else f"_{sm}-{em}"
+                mns = '' if (sm == 1 and em == 12) else f"_{sm}" if sm == em else f"_{sm}-{em}"
                 s_file = f"{file_dict[template]}_{instance}_{file_dict[center]}_{year}{mns}"
 
                 date_from, date_to = get_date_range(year, sm, em)
                 date_picker(date_from, date_to)
                 time.sleep(1)
-                alert_text = schedule(s_file)
-
-                if alert_text and "Please contact administrator" in alert_text:
+                alert_text, status = schedule(s_file)
+                if "Please contact administrator" in alert_text:
                     if sm == em:
                         date_from, date_to = get_date_range(year, sm, em)
                         process_date_range(date_from, date_to, template, instance, year)           
                     else:
                         mid = (sm + em) // 2
-                        to_process.insert(0, (mid + 1, em))
-                        to_process.insert(0, (sm, mid))
+                        if mid in [3, 9]:
+                            mid1 = (sm-1) + (2)
+                            mid2 = (sm-1) + (4)
+                            to_process.insert(0, (mid2 + 1, em))
+                            to_process.insert(0, (mid1 + 1, mid2))
+                            to_process.insert(0, (sm, mid1))
+                        else:
+                            to_process.insert(0, (mid + 1, em))
+                            to_process.insert(0, (sm, mid))
                 else:
-                    total_files += 1
+                    if status == "successfully":
+                        total_files += 1
                 
     driver.quit()
+    
 
 workbook_path = r"C:\Users\karthikeyans\Documents\BLUMIN\Automations\WebAutomation_ProcessMed.xlsx"
 workbook = load_workbook(workbook_path)
@@ -230,20 +238,20 @@ dhpo_email, dhpo_password = 'rakbi-dhpo@processmed.ae', "xL=0UX+:sb=@x#n1X).y"
 rpo_email, rpo_password = 'rakbi-rypd@processmed.ae', "kQm?f_8U1uV7Bf>u.By}"
 his_year, sub_resub_year = 2022, 2023
 dhpo_files = [
-    ('Unsettled_Sant', his_year, 'RAK', 6),
+    ('Unsettled_Sant', his_year, 'RAK', 12),
     ('Unsettled_Sant', his_year, 'RAKP', 12),
-    ('Remittance', sub_resub_year, 'RAK', 4),
+    ('Remittance', sub_resub_year, 'RAK', 12),
     ('Remittance', sub_resub_year, 'RAKP', 12),
-    ('Resub_Remittance', sub_resub_year, 'RAK', 6),
+    ('Resub_Remittance', sub_resub_year, 'RAK', 12),
     ('Resub_Remittance', sub_resub_year, 'RAKP', 12),
 ]
 
 rpo_files = [
-    ('Unsettled_Sant', his_year, 'RAK', 6),
+    ('Unsettled_Sant', his_year, 'RAK', 12),
     ('Unsettled_Sant', his_year, 'RAKP', 12),
-    ('Remittance', sub_resub_year, 'RAK', 2),
-    ('Remittance', sub_resub_year, 'RAKP', 6),
-    ('Resub_Remittance', sub_resub_year, 'RAK', 3),
+    ('Remittance', sub_resub_year, 'RAK', 12),
+    ('Remittance', sub_resub_year, 'RAKP', 12),
+    ('Resub_Remittance', sub_resub_year, 'RAK', 12),
     ('Resub_Remittance', sub_resub_year, 'RAKP', 12),                 
 ]
 
