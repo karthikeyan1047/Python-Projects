@@ -42,13 +42,13 @@ def login(username, password):
     driver.find_element(By.ID, "password").send_keys(password)
     time.sleep(1)
     wait_for_clickable_element(By.XPATH, "//button[text()='Sign In']").click()
-    time.sleep(1.5)
+    time.sleep(2)
     driver.execute_script(f"document.body.style.zoom='{zoom}'")
-    time.sleep(0.5)
+    time.sleep(1)
     wait_for_clickable_element(By.XPATH, "//i[contains(@class, 'pi-bars')]").click()
-    time.sleep(0.5)
+    time.sleep(1)
     wait_for_clickable_element(By.XPATH, "//i[contains(@class, 'pi-sun')]").click()
-    time.sleep(0.5)
+    time.sleep(1)
 
 def dropdown_select(dropdown, option):
     dd = wait_for_clickable_element(By.ID, dropdown)
