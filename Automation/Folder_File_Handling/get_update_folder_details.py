@@ -46,7 +46,6 @@ def update_folder_details(main_folder, excel_file):
         else:
             pass
 
-
 choice = int(cfx.inputbox("Select Method", "1. Get folders details\n\n2. Update folders details\n"))
 
 if choice == 1:
