@@ -138,7 +138,7 @@ def schedule(s_file):
     Alert(driver).accept()
     time.sleep(1.5)
 
-    return status
+    return alert_text, status
 
 file_dict = {
     "Unsettled_Sant" : "HIS",
@@ -167,7 +167,11 @@ def process_all_for_user(email, password, files, instance):
 
                 mns = '' if len(month_ranges) == 1 else f"_{sm}" if sm == em else f"_{sm}-{em}"
                 s_file = f"{file_dict[template]}_{instance}_{file_dict[center]}_{year}{mns}"
-                sts = schedule(s_file)
+                alrt_text, sts = schedule(s_file)
+
+                if "Please contact administrator" in alrt_text:
+                    return
+                
                 if sts == 'successfully':
                     total_files += 1
                 
@@ -254,8 +258,9 @@ for idx, (username, password) in enumerate(login_details):
                 sch_filename = wait_for_element(By.XPATH, f"//*[@id='pn_id_1-table']/tbody/tr[{r}]/td[5]", 5).text
                 if sch_filename in old_names:
                     wait_for_clickable_element(By.XPATH, f"//*[@id='pn_id_1-table']/tbody/tr[{r}]/td[9]/p-button/button").click()
-                    time.sleep(1)
+                    time.sleep(2)
                     gui.hotkey('enter')
+                    time.sleep(2)
             wait_for_clickable_element(By.XPATH, "//button[@aria-label='Next Page']").click()
 driver.quit()
 
