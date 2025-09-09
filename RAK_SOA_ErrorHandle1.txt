@@ -206,10 +206,17 @@ def process_all_for_user(email, password, files, instance):
                         process_date_range(date_from, date_to, template, instance, year)           
                     else:
                         mid = (sm + em) // 2
-                        if mid in [3, 9]:
+                        if mid in [2,5,8,12]:
+                            sm1, em1 = to_process[0]
                             mid1 = (sm-1) + (2)
                             mid2 = (sm-1) + (4)
-                            to_process.insert(0, (mid2 + 1, em))
+
+                            if len(to_process) == 1:
+                                to_process = []
+                            else:
+                                to_process = [to_process.pop()]
+
+                            to_process.insert(0, (mid2 + 1, em1))
                             to_process.insert(0, (mid1 + 1, mid2))
                             to_process.insert(0, (sm, mid1))
                         else:
