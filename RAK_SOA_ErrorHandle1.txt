@@ -112,6 +112,7 @@ def date_picker(datefrm, dateto):
 row = 2
 def schedule(s_file):
     global row
+
     schedule_button = wait_for_clickable_element(By.XPATH, "//button[.//span[text()='Schedule']]")
     schedule_button.click()
 
@@ -200,6 +201,7 @@ def process_all_for_user(email, password, files, instance):
                 date_picker(date_from, date_to)
                 time.sleep(1)
                 alert_text, status = schedule(s_file)
+
                 if "Please contact administrator" in alert_text:
                     if sm == em:
                         date_from, date_to = get_date_range(year, sm, em)
