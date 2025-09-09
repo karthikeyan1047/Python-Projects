@@ -17,11 +17,11 @@ def wait_for_window(title_substring, filename, timeout=120):
             pag.press('y')
 
             if filename == "DRS_RPO_IPOP 1":
-                time.sleep(15)
+                time.sleep(25)
             elif filename in ["DRS_DHPO_IPOP", "DRS_RPO_IPOP 2"]:
-                time.sleep(7)
-            else:
                 time.sleep(5)
+            else:
+                time.sleep(3)
 
             pag.hotkey('ctrl', 'w')
             time.sleep(1)
