@@ -184,12 +184,12 @@ def process_all_for_user(email, password, files, instance):
     driver.implicitly_wait(60)
     login_and_select_date_field(email, password, date_field)
 
-    for template, yr_start, center, step in files:
+    for template, yr_start, center in files:
         dropdown_select('pn_id_7', template)
         dropdown_select('pn_id_11', center)
 
         for year in range(yr_start, yr_curr + 1):
-            month_ranges = generate_month_ranges(year, step)
+            month_ranges = generate_month_ranges(year, 12)
             to_process = month_ranges.copy()
             while to_process:
                 sm, em = to_process.pop(0)
@@ -247,21 +247,21 @@ dhpo_email, dhpo_password = 'rakbi-dhpo@processmed.ae', "xL=0UX+:sb=@x#n1X).y"
 rpo_email, rpo_password = 'rakbi-rypd@processmed.ae', "kQm?f_8U1uV7Bf>u.By}"
 his_year, sub_resub_year = 2022, 2023
 dhpo_files = [
-    ('Unsettled_Sant', his_year, 'RAK', 12),
-    ('Unsettled_Sant', his_year, 'RAKP', 12),
-    ('Remittance', sub_resub_year, 'RAK', 12),
-    ('Remittance', sub_resub_year, 'RAKP', 12),
-    ('Resub_Remittance', sub_resub_year, 'RAK', 12),
-    ('Resub_Remittance', sub_resub_year, 'RAKP', 12),
+    ('Unsettled_Sant', his_year, 'RAK'),
+    ('Unsettled_Sant', his_year, 'RAKP'),
+    ('Remittance', sub_resub_year, 'RAK'),
+    ('Remittance', sub_resub_year, 'RAKP'),
+    ('Resub_Remittance', sub_resub_year, 'RAK'),
+    ('Resub_Remittance', sub_resub_year, 'RAKP'),
 ]
 
 rpo_files = [
-    ('Unsettled_Sant', his_year, 'RAK', 12),
-    ('Unsettled_Sant', his_year, 'RAKP', 12),
-    ('Remittance', sub_resub_year, 'RAK', 12),
-    ('Remittance', sub_resub_year, 'RAKP', 12),
-    ('Resub_Remittance', sub_resub_year, 'RAK', 12),
-    ('Resub_Remittance', sub_resub_year, 'RAKP', 12),                 
+    ('Unsettled_Sant', his_year, 'RAK'),
+    ('Unsettled_Sant', his_year, 'RAKP'),
+    ('Remittance', sub_resub_year, 'RAK'),
+    ('Remittance', sub_resub_year, 'RAKP'),
+    ('Resub_Remittance', sub_resub_year, 'RAK'),
+    ('Resub_Remittance', sub_resub_year, 'RAKP'),                 
 ]
 
 rak_renames_sh.cell(row=1, column=1).value = 'Old Name'
