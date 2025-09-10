@@ -168,7 +168,7 @@ workbook = load_workbook(workbook_path)
 soa_sh_name = 'SOA_Rename'
 soa_sh = workbook[soa_sh_name]
 cfx.close_book(workbook_path)
-# cfx.clearing(soa_sh)
+cfx.clearing(soa_sh)
 
 url = "https://rcmbi.processmed.ae/login"
 username = "hbaybi-dhpo@processmed.ae"
@@ -177,23 +177,23 @@ date_field = "Encounter.Start"
 template = "Healthbay_SOA"
 centers = ['HBD', 'HBPV', 'HBPM', 'HBPW']
 yr_curr = datetime.today().year
-# mn_curr = datetime.today().month
+mn_curr = datetime.today().month
 
-# soa_sh.cell(row=1, column=1).value = 'Old Name'
-# soa_sh.cell(row=1, column=2).value = 'New Name'
-# soa_sh.cell(row=1, column=3).value = 'Status'
+soa_sh.cell(row=1, column=1).value = 'Old Name'
+soa_sh.cell(row=1, column=2).value = 'New Name'
+soa_sh.cell(row=1, column=3).value = 'Status'
 
-# process_all_for_user(username, password, centers)
-# time.sleep(2)
+process_all_for_user(username, password, centers)
+time.sleep(2)
 
-# driver.quit()
+driver.quit()
 
-# cfx.show_info("Total Files", f"Total Files generated : {total_files}")
+cfx.show_info("Total Files", f"Total Files generated : {total_files}")
 
-# cfx.autofit_columns(soa_sh)
-# workbook.save(workbook_path)
+cfx.autofit_columns(soa_sh)
+workbook.save(workbook_path)
 
-# time.sleep(3)
+time.sleep(3)
 
 pg = int((((yr_curr - 2023) + 1) * 3)/10) + 2
 df = pd.read_excel(workbook_path, sheet_name='SOA_Rename')
