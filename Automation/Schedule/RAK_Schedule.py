@@ -260,7 +260,6 @@ for idx, (username, password) in enumerate(login_details):
                     wait_for_clickable_element(By.XPATH, f"//*[@id='pn_id_1-table']/tbody/tr[{r}]/td[9]/p-button/button").click()
                     time.sleep(2)
                     gui.hotkey('enter')
-                    time.sleep(2)
             wait_for_clickable_element(By.XPATH, "//button[@aria-label='Next Page']").click()
 driver.quit()
 

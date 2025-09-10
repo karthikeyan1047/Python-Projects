@@ -3,7 +3,7 @@ import pygetwindow as gw
 import time, clipboard, sys
 import _functions as cfx
 
-def wait_for_window(title_substring, filename, timeout=120):
+def wait_for_window(title_substring, filename, timeout=180):
     start_time = time.time()
     while time.time() - start_time < timeout:
         windows = gw.getWindowsWithTitle(title_substring)
@@ -17,7 +17,7 @@ def wait_for_window(title_substring, filename, timeout=120):
             pag.press('y')
 
             if filename == "DRS_RPO_IPOP 1":
-                time.sleep(25)
+                time.sleep(30)
             elif filename in ["DRS_DHPO_IPOP", "DRS_RPO_IPOP 2"]:
                 time.sleep(5)
             else:

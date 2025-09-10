@@ -139,6 +139,7 @@ def schedule(s_file):
 
     Alert(driver).accept()
     time.sleep(1.5)
+    return status
 
 total_files = 0
 def process_all_for_user(email, password, centers):
@@ -157,8 +158,9 @@ def process_all_for_user(email, password, centers):
 
                 mns = '' if len(month_ranges) == 1 else f"_{sm}" if sm == em else f"_{sm}-{em}"
                 s_file = f"{center}_{year}{mns}"
-                schedule(s_file)
-                total_files += 1
+                sts = schedule(s_file)
+                if sts == 'successfully':
+                    total_files += 1
       
 
 workbook_path = r"C:\Users\karthikeyans\Documents\BLUMIN\Automations\WebAutomation_ProcessMed.xlsx"
@@ -166,7 +168,7 @@ workbook = load_workbook(workbook_path)
 soa_sh_name = 'SOA_Rename'
 soa_sh = workbook[soa_sh_name]
 cfx.close_book(workbook_path)
-cfx.clearing(soa_sh)
+# cfx.clearing(soa_sh)
 
 url = "https://rcmbi.processmed.ae/login"
 username = "hbaybi-dhpo@processmed.ae"
@@ -175,23 +177,23 @@ date_field = "Encounter.Start"
 template = "Healthbay_SOA"
 centers = ['HBD', 'HBPV', 'HBPM', 'HBPW']
 yr_curr = datetime.today().year
-mn_curr = datetime.today().month
+# mn_curr = datetime.today().month
 
-soa_sh.cell(row=1, column=1).value = 'Old Name'
-soa_sh.cell(row=1, column=2).value = 'New Name'
-soa_sh.cell(row=1, column=3).value = 'Status'
+# soa_sh.cell(row=1, column=1).value = 'Old Name'
+# soa_sh.cell(row=1, column=2).value = 'New Name'
+# soa_sh.cell(row=1, column=3).value = 'Status'
 
-process_all_for_user(username, password, centers)
-time.sleep(2)
+# process_all_for_user(username, password, centers)
+# time.sleep(2)
 
-driver.quit()
+# driver.quit()
 
-cfx.show_info("Total Files", f"Total Files generated : {total_files}")
+# cfx.show_info("Total Files", f"Total Files generated : {total_files}")
 
-cfx.autofit_columns(soa_sh)
-workbook.save(workbook_path)
+# cfx.autofit_columns(soa_sh)
+# workbook.save(workbook_path)
 
-time.sleep(3)
+# time.sleep(3)
 
 pg = int((((yr_curr - 2023) + 1) * 3)/10) + 2
 df = pd.read_excel(workbook_path, sheet_name='SOA_Rename')
@@ -224,7 +226,7 @@ for center in centers:
             sch_filename = wait_for_element(By.XPATH, f"//*[@id='pn_id_1-table']/tbody/tr[{r}]/td[5]", 5).text
             if sch_filename in old_names:
                 wait_for_clickable_element(By.XPATH, f"//*[@id='pn_id_1-table']/tbody/tr[{r}]/td[9]/p-button/button").click()
-                time.sleep(1)
+                time.sleep(2)
                 gui.hotkey('enter')
         wait_for_clickable_element(By.XPATH, "//button[@aria-label='Next Page']").click()
 driver.quit()

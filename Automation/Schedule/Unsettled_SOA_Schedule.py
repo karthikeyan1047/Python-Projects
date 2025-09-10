@@ -224,7 +224,7 @@ for center in centers:
             sch_filename = wait_for_element(By.XPATH, f"//*[@id='pn_id_1-table']/tbody/tr[{r}]/td[5]", 5).text
             if sch_filename in old_names:
                 wait_for_clickable_element(By.XPATH, f"//*[@id='pn_id_1-table']/tbody/tr[{r}]/td[9]/p-button/button").click()
-                time.sleep(1)
+                time.sleep(2)
                 gui.hotkey('enter')
         wait_for_clickable_element(By.XPATH, "//button[@aria-label='Next Page']").click()
 driver.quit()
