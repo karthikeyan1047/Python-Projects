@@ -198,7 +198,7 @@ dhpo_files = [
     ('Remittance', sub_resub_year, 'RAK', 4),
     ('Remittance', sub_resub_year, 'RAKP', 12),
     ('Resub_Remittance', sub_resub_year, 'RAK', 6),
-    ('Resub_Remittance', sub_resub_year, 'RAKP', 12),
+    ('Resub_Remittance', sub_resub_year, 'RAKP', 12)
 ]
 
 rpo_files = [
@@ -207,7 +207,7 @@ rpo_files = [
     ('Remittance', sub_resub_year, 'RAK', 2),
     ('Remittance', sub_resub_year, 'RAKP', 6),
     ('Resub_Remittance', sub_resub_year, 'RAK', 3),
-    ('Resub_Remittance', sub_resub_year, 'RAKP', 12),                 
+    ('Resub_Remittance', sub_resub_year, 'RAKP', 12)                
 ]
 
 rak_renames_sh.cell(row=1, column=1).value = 'Old Name'
