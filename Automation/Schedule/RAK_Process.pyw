@@ -152,7 +152,7 @@ def delete_old_files(folders):
     os.startfile(open_folder)
 
 
-def copy_current_files():
+def downloads_to_rak():
     f_count = 0
     for file_name in os.listdir(dwl_folder):
         src_file_path = os.path.join(dwl_folder, file_name)
@@ -181,6 +181,10 @@ def copy_current_files():
     open_folder = f"{fpa_folder}\\2023\\DHPO"
     os.startfile(open_folder)
 
+def rak_to_source():
+    bat_file = r"C:\Users\karthikeyans\Documents\BLUMIN\Automations\RAK File Transfer\1.RAK.bat"
+    os.startfile(bat_file)
+
 def delete_dwl_files():
     close_book(excel_file)
 
@@ -208,8 +212,9 @@ rak_folders = [his_folder, fpa_folder, lw_folder]
 def rak_process():
     root = tk.Tk()
     root.title("File Operations")
+    root.attributes('-topmost', True)
     window_width = 300
-    window_height = 260
+    window_height = 300
 
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
@@ -225,7 +230,8 @@ def rak_process():
     tk.Button(button_frame, text="Open Base Folder", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='#F08080', command=lambda: [open_base_folder(), root.destroy()]).pack(pady=5)
     tk.Button(button_frame, text="Rename Files", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='#F08080', command=lambda: [renaming_files(), root.destroy()]).pack(pady=5)
     tk.Button(button_frame, text="Delete - Old RAK Files", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='#F08080', command=lambda: [delete_old_files(rak_folders), root.destroy()]).pack(pady=5)
-    tk.Button(button_frame, text="Move - Current Files to RAK", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='#F08080', command=lambda: [copy_current_files(), root.destroy()]).pack(pady=5)
+    tk.Button(button_frame, text="Copy - Downloads to RAK", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='#F08080', command=lambda: [downloads_to_rak(), root.destroy()]).pack(pady=5)
+    tk.Button(button_frame, text="Move - RAK to Source", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='#F08080', command=lambda: [rak_to_source(), root.destroy()]).pack(pady=5)
     tk.Button(button_frame, text="Delete Downloaded Files", width=30, font= ('Bahnschrift SemiLight SemiConde', 12, 'bold'), fg='black', bg='#F08080', command=lambda: [delete_dwl_files(), root.destroy()]).pack(pady=5)
 
     root.mainloop()
