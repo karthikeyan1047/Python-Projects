@@ -194,8 +194,6 @@ def delete_dwl_files():
 
     os.startfile(dwl_folder)
 
-
-
 def rak_process():
     root = tk.Tk()
     root.title("File Operations")

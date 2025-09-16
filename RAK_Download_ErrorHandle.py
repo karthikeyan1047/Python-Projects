@@ -12,6 +12,7 @@ import time, math
 import _functions as cfx
 import pyautogui as gui
 
+
 options = Options()
 prefs = {
     "download.prompt_for_download": True,
@@ -41,13 +42,13 @@ def login(username, password):
     driver.find_element(By.ID, "password").send_keys(password)
     time.sleep(1)
     wait_for_clickable_element(By.XPATH, "//button[text()='Sign In']").click()
-    time.sleep(2)
+    time.sleep(1.5)
     driver.execute_script(f"document.body.style.zoom='{zoom}'")
-    time.sleep(1)
+    time.sleep(0.5)
     wait_for_clickable_element(By.XPATH, "//i[contains(@class, 'pi-bars')]").click()
-    time.sleep(1)
+    time.sleep(0.5)
     wait_for_clickable_element(By.XPATH, "//i[contains(@class, 'pi-sun')]").click()
-    time.sleep(1)
+    time.sleep(0.5)
 
 def dropdown_select(dropdown, option):
     dd = wait_for_clickable_element(By.ID, dropdown)
@@ -111,6 +112,7 @@ def date_picker(datefrm, dateto):
 row = 2
 def schedule(s_file):
     global row
+
     schedule_button = wait_for_clickable_element(By.XPATH, "//button[.//span[text()='Schedule']]")
     schedule_button.click()
 
@@ -146,6 +148,34 @@ file_dict = {
     "RAK" : "H",
     "RAKP" : "P"
 }
+
+def process_date_range(date_from: datetime, date_to: datetime, template:str, instance:str, center:str, year):
+    global total_files
+
+    sday = date_from.day
+    eday = date_to.day
+    dmonth = date_from.month
+
+    mns = f"_{dmonth}_({sday}-{eday})"
+    s_file = f"{file_dict[template]}_{instance}_{file_dict[center]}_{year}{mns}"
+
+    date_picker(date_from.date(), date_to.date())
+    time.sleep(1)
+    alert_text, status = schedule(s_file)
+
+    if "Please contact administrator" in alert_text:
+        if (date_to - date_from).days == 0:
+            return
+        mid_date = date_from + (date_to - date_from) // 2
+        next_start = mid_date + timedelta(days=1)
+
+        process_date_range(date_from, mid_date, template, instance, center, year)
+        process_date_range(next_start, date_to, template, instance, center, year)
+    else:
+        if status == "s": #"successfully":
+            total_files += 1
+
+
 total_files = 0
 def process_all_for_user(email, password, files, instance):
     global driver, total_files
@@ -153,28 +183,52 @@ def process_all_for_user(email, password, files, instance):
     driver.implicitly_wait(60)
     login_and_select_date_field(email, password, date_field)
 
-    for template, yr_start, center, step in files:
+    for template, yr_start, center in files:
         dropdown_select('pn_id_7', template)
         dropdown_select('pn_id_11', center)
 
         for year in range(yr_start, yr_curr + 1):
-            month_ranges = generate_month_ranges(year, step)
-            for sm, em in month_ranges:
+            month_ranges = generate_month_ranges(year, 12)
+            to_process = month_ranges.copy()
+            while to_process:
+                sm, em = to_process.pop(0)
+
+                mns = '' if (sm == 1 and em == 12) else f"_{sm}" if sm == em else f"_{sm}-{em}"
+                s_file = f"{file_dict[template]}_{instance}_{file_dict[center]}_{year}{mns}"
+
                 date_from, date_to = get_date_range(year, sm, em)
                 date_picker(date_from, date_to)
                 time.sleep(1)
+                alert_text, status = schedule(s_file)
 
-                mns = '' if len(month_ranges) == 1 else f"_{sm}" if sm == em else f"_{sm}-{em}"
-                s_file = f"{file_dict[template]}_{instance}_{file_dict[center]}_{year}{mns}"
-                alrt_text, sts = schedule(s_file)
+                if "Please contact administrator" in alert_text:
+                    if sm == em:
+                        date_from, date_to = get_date_range(year, sm, em)
+                        process_date_range(date_from, date_to, template, instance, center, year)           
+                    else:
+                        mid = (sm + em) // 2
+                        if mid in [2,5,8,12]:
+                            sm1, em1 = to_process[0]
+                            mid1 = (sm-1) + (2)
+                            mid2 = (sm-1) + (4)
 
-                if "Please contact administrator" in alrt_text:
-                    return
-                
-                if sts == 'successfully':
-                    total_files += 1
+                            if len(to_process) == 1:
+                                to_process = []
+                            else:
+                                to_process = [to_process.pop()]
+
+                            to_process.insert(0, (mid2 + 1, em1))
+                            to_process.insert(0, (mid1 + 1, mid2))
+                            to_process.insert(0, (sm, mid1))
+                        else:
+                            to_process.insert(0, (mid + 1, em))
+                            to_process.insert(0, (sm, mid))
+                else:
+                    if status == 's': #"successfully":
+                        total_files += 1
                 
     driver.quit()
+    
 
 workbook_path = r"C:\Users\karthikeyans\Documents\BLUMIN\Automations\WebAutomation_ProcessMed.xlsx"
 workbook = load_workbook(workbook_path)
@@ -192,21 +246,21 @@ dhpo_email, dhpo_password = 'rakbi-dhpo@processmed.ae', "xL=0UX+:sb=@x#n1X).y"
 rpo_email, rpo_password = 'rakbi-rypd@processmed.ae', "kQm?f_8U1uV7Bf>u.By}"
 his_year, sub_resub_year = 2022, 2023
 dhpo_files = [
-    ('Unsettled_Sant', his_year, 'RAK', 6),
-    ('Unsettled_Sant', his_year, 'RAKP', 12),
-    ('Remittance', sub_resub_year, 'RAK', 4),
-    ('Remittance', sub_resub_year, 'RAKP', 12),
-    ('Resub_Remittance', sub_resub_year, 'RAK', 6),
-    ('Resub_Remittance', sub_resub_year, 'RAKP', 12)
+    ('Unsettled_Sant', his_year, 'RAK'),
+    ('Unsettled_Sant', his_year, 'RAKP'),
+    ('Remittance', sub_resub_year, 'RAK'),
+    ('Remittance', sub_resub_year, 'RAKP'),
+    ('Resub_Remittance', sub_resub_year, 'RAK'),
+    ('Resub_Remittance', sub_resub_year, 'RAKP'),
 ]
 
 rpo_files = [
-    ('Unsettled_Sant', his_year, 'RAK', 6),
-    ('Unsettled_Sant', his_year, 'RAKP', 12),
-    ('Remittance', sub_resub_year, 'RAK', 2),
-    ('Remittance', sub_resub_year, 'RAKP', 6),
-    ('Resub_Remittance', sub_resub_year, 'RAK', 3),
-    ('Resub_Remittance', sub_resub_year, 'RAKP', 12)                
+    ('Unsettled_Sant', his_year, 'RAK'),
+    ('Unsettled_Sant', his_year, 'RAKP'),
+    ('Remittance', sub_resub_year, 'RAK'),
+    ('Remittance', sub_resub_year, 'RAKP'),
+    ('Resub_Remittance', sub_resub_year, 'RAK'),
+    ('Resub_Remittance', sub_resub_year, 'RAKP'),                 
 ]
 
 rak_renames_sh.cell(row=1, column=1).value = 'Old Name'
@@ -223,41 +277,41 @@ cfx.show_info("Total Files", f"Total Files generated : {total_files}")
 cfx.autofit_columns(rak_renames_sh)
 workbook.save(workbook_path)
 
-time.sleep(3)
+# time.sleep(3)
 
-pg = math.ceil(((((yr_curr - 2023) + 1) * 12) + 2) / 10) + 2
-login_details = [(dhpo_email, dhpo_password), (rpo_email, rpo_password)]
-centers_dwl = ['RAK', 'RAKP']
-df = pd.read_excel(workbook_path, sheet_name='RAK_Rename')
-rename_dict = dict(df)
-old_names = rename_dict['Old Name'].to_list()
-driver = webdriver.Chrome(options=options)
-wait = WebDriverWait(driver, 20)
-for idx, (username, password) in enumerate(login_details):
-    login(username, password)
-    wait_for_clickable_element(By.XPATH, "//button[.//span[text()='Reports']]").click()
+# pg = math.ceil(((((yr_curr - 2023) + 1) * 12) + 2) / 10) + 2
+# login_details = [(dhpo_email, dhpo_password), (rpo_email, rpo_password)]
+# centers_dwl = ['RAK', 'RAKP']
+# df = pd.read_excel(workbook_path, sheet_name='RAK_Rename')
+# rename_dict = dict(df)
+# old_names = rename_dict['Old Name'].to_list()
+# driver = webdriver.Chrome(options=options)
+# wait = WebDriverWait(driver, 20)
+# for idx, (username, password) in enumerate(login_details):
+#     login(username, password)
+#     wait_for_clickable_element(By.XPATH, "//button[.//span[text()='Reports']]").click()
 
-    for center in centers_dwl:
-        dropdown_select('clientName', center)
-        wait_for_clickable_element(By.XPATH, "//button[.//span[text()='Refresh']]").click()
+#     for center in centers_dwl:
+#         dropdown_select('clientName', center)
+#         wait_for_clickable_element(By.XPATH, "//button[.//span[text()='Refresh']]").click()
 
-        wait_for_element(By.XPATH, f"//table//tr/td[2][text()=' {center} ']", 30)
+#         wait_for_element(By.XPATH, f"//table//tr/td[2][text()=' {center} ']", 30)
 
-        try:
-            wait_for_clickable_element(By.XPATH, "//button[@aria-label='First Page']", 5).click()
-        except:
-            pass
+#         try:
+#             wait_for_clickable_element(By.XPATH, "//button[@aria-label='First Page']", 5).click()
+#         except:
+#             pass
 
-        for i in range(1, pg+1):
-            wait.until(
-                lambda d: len(d.find_elements(By.XPATH, "//*[@id='pn_id_1-table']/tbody/tr")) >= 10
-            )
-            rows = driver.find_elements(By.XPATH, "//*[@id='pn_id_1-table']/tbody/tr")
-            for r in range(1, len(rows)+1):
-                sch_filename = wait_for_element(By.XPATH, f"//*[@id='pn_id_1-table']/tbody/tr[{r}]/td[5]", 5).text
-                if sch_filename in old_names:
-                    wait_for_clickable_element(By.XPATH, f"//*[@id='pn_id_1-table']/tbody/tr[{r}]/td[9]/p-button/button").click()
-                    time.sleep(2)
-                    gui.hotkey('enter')
-            wait_for_clickable_element(By.XPATH, "//button[@aria-label='Next Page']").click()
-driver.quit()
+#         for i in range(1, pg+1):
+#             wait.until(
+#                 lambda d: len(d.find_elements(By.XPATH, "//*[@id='pn_id_1-table']/tbody/tr")) >= 10
+#             )
+#             rows = driver.find_elements(By.XPATH, "//*[@id='pn_id_1-table']/tbody/tr")
+#             for r in range(1, len(rows)+1):
+#                 sch_filename = wait_for_element(By.XPATH, f"//*[@id='pn_id_1-table']/tbody/tr[{r}]/td[5]", 5).text
+#                 if sch_filename in old_names:
+#                     wait_for_clickable_element(By.XPATH, f"//*[@id='pn_id_1-table']/tbody/tr[{r}]/td[9]/p-button/button").click()
+#                     time.sleep(1)
+#                     gui.hotkey('enter')
+#             wait_for_clickable_element(By.XPATH, "//button[@aria-label='Next Page']").click()
+# driver.quit()

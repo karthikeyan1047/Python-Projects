@@ -206,7 +206,6 @@ def delete_dwl_files():
 
     os.startfile(dwl_folder)
 
-
 rak_folders = [his_folder, fpa_folder, lw_folder]
 
 def rak_process():
