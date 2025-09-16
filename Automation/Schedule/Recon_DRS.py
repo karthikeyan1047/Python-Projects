@@ -9,7 +9,6 @@ from datetime import timedelta
 url1 = "https://rcm.processmed.ae:5073/Account/Login?p=rakhospital"
 url2 = "https://rcm.processmed.ae:5091/"
 
-
 usernames1 = ["L1145", "L5067", "L206"]
 passwords1 = ["b9W%68Ry&&BK", "bT2&sj9$2.5cL3Sz", "2v<>sW4NzJIRP3A)"]
 
@@ -18,7 +17,6 @@ passwords2 = ["C)cC1@8+3K\"X;#p-", "]k,?F1|W:rr4g>1-", "F_1IWb@Pa9a9_$ti", "`i7~
 
 usernames3 = ['rakhpharmacy', 'rakhospital', 'rakmc-ghalilla', 'smclsharjah', 'SIMCNEW', 'Medstar2015', 'alhamra-rmc', 'rmcjazeera', 'Smcl']
 passwords3 = ["4>o14}6)z71Bx4\\a", "lU\"i(.X77+2<3W@p", "Zi92#kW\"Q2`$AOp4", ",5s8QjYb,q}bH6b3", "wQ73r8{rCR>SF@l{", "/*OL~h0z77DF$g1A", "|}y629688@5P^WTf", "3?xq0:Rc'Jjl4>i,", "ym7Yg5aC[VE*0w;5"]
-
 
 choice = int(cfx.inputbox(title='Choose', prompt='Choose : \n   1. DHPO\n   2. RPO\n   3. RPO - 1\n   4. RPO - 2\n   5. All\n\nEnter Choice : '))
 
@@ -44,7 +42,6 @@ options.add_argument('--ignore-certificate-errors')
 options.add_argument("--disable-popup-blocking")
 options.add_experimental_option('detach', True)
 
-
 def login_and_filling(username, password, dtfrm, dtto, is_rpo):
         driver = webdriver.Chrome(options=options)
         driver.implicitly_wait(15)
@@ -62,7 +59,7 @@ def login_and_filling(username, password, dtfrm, dtto, is_rpo):
         driver.find_element(By.XPATH, "//*[@id='frmdate']").send_keys(dtfrm)
         driver.find_element(By.XPATH, "//*[@id='todate']").clear()
         driver.find_element(By.XPATH, "//*[@id='todate']").send_keys(dtto)
-
+        driver.download_file
         if is_rpo:
             Select(driver.find_element(By.ID, "seldownload")).select_by_visible_text('All')
         
@@ -113,5 +110,3 @@ elif choice == 5:
     cfx.show_info("Complete", "All Completed")
 else:
     sys.exit()
-
-

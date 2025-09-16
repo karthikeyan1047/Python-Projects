@@ -262,4 +262,3 @@ for idx, (username, password) in enumerate(login_details):
                     gui.hotkey('enter')
             wait_for_clickable_element(By.XPATH, "//button[@aria-label='Next Page']").click()
 driver.quit()
-

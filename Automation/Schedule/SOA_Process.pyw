@@ -224,5 +224,3 @@ def rak_process():
     root.mainloop()
 
 rak_process()
-
-
