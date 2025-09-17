@@ -12,7 +12,6 @@ import time, math
 import _functions as cfx
 import pyautogui as gui
 
-
 options = Options()
 prefs = {
     "download.prompt_for_download": True,
@@ -79,7 +78,6 @@ def generate_month_ranges(year, step):
             if start > current_month:
                 break
             ranges.append((start, min(end, current_month)))
-    
     return ranges
 
 def get_date_range(year, start_month, end_month):
@@ -172,9 +170,8 @@ def process_date_range(date_from: datetime, date_to: datetime, template:str, ins
         process_date_range(date_from, mid_date, template, instance, center, year)
         process_date_range(next_start, date_to, template, instance, center, year)
     else:
-        if status == "s": #"successfully":
+        if status == "successfully":
             total_files += 1
-
 
 total_files = 0
 def process_all_for_user(email, password, files, instance):
@@ -224,11 +221,10 @@ def process_all_for_user(email, password, files, instance):
                             to_process.insert(0, (mid + 1, em))
                             to_process.insert(0, (sm, mid))
                 else:
-                    if status == 's': #"successfully":
+                    if status == "successfully":
                         total_files += 1
                 
     driver.quit()
-    
 
 workbook_path = r"C:\Users\karthikeyans\Documents\BLUMIN\Automations\WebAutomation_ProcessMed.xlsx"
 workbook = load_workbook(workbook_path)
